@@ -1,0 +1,100 @@
+# Self-healing stage: when the nightly/main test run fails, a Claude agent
+# executes the failure-triage loop (step back → evaluate → root cause →
+# resolve → verify) and opens a PR with the fix — never a silent runtime heal.
+#
+# Setup required (one time):
+#   1. Repo secret ANTHROPIC_API_KEY (console.anthropic.com)
+#   2. Settings → Actions → General → "Allow GitHub Actions to create and
+#      approve pull requests" must be enabled.
+#
+# Deliberately NOT triggered for pull_request failures — those belong to the
+# PR author. This heals main-branch and scheduled regression failures only.
+name: auto-triage
+
+on:
+  workflow_run:
+    workflows: [tests]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+  actions: read
+
+jobs:
+  triage:
+    if: >-
+      github.event.workflow_run.conclusion == 'failure' &&
+      github.event.workflow_run.event != 'pull_request'
+    runs-on: ubuntu-latest
+    env:
+      UI_BASE_URL: ${{ vars.UI_BASE_URL }}
+      STANDARD_USER: ${{ secrets.STANDARD_USER }}
+      STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD }}
+      CI: 'true'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Download failure artifacts (traces, reports, error context)
+        uses: actions/download-artifact@v4
+        with:
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+          path: failed-run-artifacts
+        continue-on-error: true # artifacts may have expired
+
+      - name: Run failure-triage agent
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --max-turns 40
+            --allowedTools "Read,Edit,Write,Glob,Grep,Bash"
+          prompt: |
+            Test run ${{ github.event.workflow_run.id }} on branch
+            "${{ github.event.workflow_run.head_branch }}" failed
+            (trigger: ${{ github.event.workflow_run.event }}).
+
+            You are the failure-triage agent for this repo. Read CLAUDE.md first,
+            then .claude/skills/failure-triage/SKILL.md and its references —
+            follow that loop exactly. Downloaded artifacts from the failed run
+            (Playwright error contexts, traces, reports) are in ./failed-run-artifacts.
+
+            Steps:
+            1. Reproduce: run `npm run typecheck`, `npm run lint`, then
+               `npx playwright test` for the failing project/tags found in the
+               artifacts. Confirm the same failure.
+            2. Classify it against the failure taxonomy and find the ROOT CAUSE
+               at its source layer (page object, schema, factory, env, or the
+               product itself).
+            3. If it is a TEST-SIDE defect (selector drift, contract drift, data
+               collision, missing await): fix it at the source, re-run the exact
+               failing tests plus `npm run validate` until green, then create a
+               branch `auto-triage/<short-description>`, commit with a message
+               explaining root cause and fix, and open a PR with `gh pr create`
+               describing: symptom, root cause, fix, verification evidence.
+            4. If it is a PRODUCT bug or the target environment is down: do NOT
+               change any test, assertion, or timeout. Instead open a GitHub
+               issue with `gh issue create` titled "[auto-triage] <summary>"
+               containing the evidence, and stop.
+
+            Hard rules from the constitution — violating them is failure:
+            never loosen an assertion to make a test pass, never add
+            waitForTimeout or force:true, never touch src/core/, never mark
+            tests as skipped, and stop after opening exactly one PR or issue.

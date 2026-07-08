@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The AI-native testing system — animated architecture</title>
+<style>
+  body { margin: 0; background: #26262e; display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: ui-sans-serif, system-ui, "Segoe UI", sans-serif; }
+  #wrap { width: min(820px, 96vw); margin-top: 16px; }
+  #replay { margin: 10px 0 24px; padding: 8px 18px; border: 1px solid #7db287; background: transparent; color: #a9cf8f; border-radius: 8px; font-size: 14px; cursor: pointer; }
+  #replay:hover { background: #7db28722; }
+
+  svg { background: #34343d; border-radius: 14px; width: 100%; height: auto; display: block; }
+  .b { opacity: 0; animation: pop .5s cubic-bezier(.2,.8,.3,1) forwards; }
+  @keyframes pop { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  .a { fill: none; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: draw .35s ease forwards; }
+  @keyframes draw { from { opacity: 1; stroke-dashoffset: 1; } to { opacity: 1; stroke-dashoffset: 0; } }
+  .lb { opacity: 0; animation: fade .4s ease forwards; }
+  @keyframes fade { to { opacity: 1; } }
+  .flow { fill: none; stroke: #f2eda0; stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 5 14; opacity: 0;
+          animation: flowdash 1.1s linear infinite, fade .6s ease 7.4s forwards; }
+  @keyframes flowdash { to { stroke-dashoffset: -19; } }
+  .pulse { animation: pop .5s cubic-bezier(.2,.8,.3,1) forwards, pulse 2.4s ease 7.4s infinite; }
+  @keyframes pulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.18); } }
+  @media (prefers-reduced-motion: reduce) {
+    .b,.a,.lb { animation: none; opacity: 1; stroke-dashoffset: 0; }
+    .flow { display: none; }
+    .pulse { animation: none; opacity: 1; }
+  }
+  text { font-family: inherit; }
+  .h1 { font-size: 27px; font-weight: 800; fill: #f2eda0; }
+  .colh { font-size: 17px; font-weight: 700; }
+  .bt { font-size: 17px; font-weight: 700; }
+  .bs { font-size: 12.5px; font-weight: 500; }
+  .al { font-size: 12.5px; font-style: italic; fill: #d8d4e6; }
+</style>
+</head>
+<body>
+<div id="wrap">
+<svg viewBox="0 0 760 900" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="ttl dsc">
+  <title id="ttl">The AI-native testing system</title>
+  <desc id="dsc">Two columns — the Playwright scaffold and the AI orchestration layer — feed strict workflows. Execute then validate: pass proceeds; failure loops through step back, evaluate, root cause, resolve, verify again.</desc>
+  <defs>
+    <marker id="ag" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#a9cf8f"/>
+    </marker>
+    <marker id="ay" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#e6df8e"/>
+    </marker>
+  </defs>
+
+  <!-- Title + column headers -->
+  <text class="h1 b" x="380" y="46" text-anchor="middle">The AI-native testing system</text>
+  <text class="colh b" x="190" y="86" text-anchor="middle" fill="#8fc79a" style="animation-delay:.35s">Playwright, the scaffold</text>
+  <text class="colh b" x="570" y="86" text-anchor="middle" fill="#f2eda0" style="animation-delay:.35s">Orchestration, the AI layer</text>
+
+  <!-- Left column -->
+  <g class="b" style="animation-delay:.6s">
+    <rect x="35" y="104" width="310" height="62" rx="12" fill="#7db287"/>
+    <text class="bt" x="190" y="131" text-anchor="middle" fill="#17211a">Single source of truth</text>
+    <text class="bs" x="190" y="151" text-anchor="middle" fill="#2c3a2f">config · enums · env · schemas</text>
+  </g>
+  <path class="a" style="animation-delay:.95s" pathLength="1" d="M190 168 L190 196" stroke="#a9cf8f" marker-end="url(#ag)"/>
+  <g class="b" style="animation-delay:1.1s">
+    <rect x="35" y="200" width="310" height="62" rx="12" fill="#7db287"/>
+    <text class="bt" x="190" y="227" text-anchor="middle" fill="#17211a">Design patterns</text>
+    <text class="bs" x="190" y="247" text-anchor="middle" fill="#2c3a2f">fixtures · API abstraction · POM</text>
+  </g>
+  <path class="a" style="animation-delay:1.45s" pathLength="1" d="M190 264 L190 292" stroke="#a9cf8f" marker-end="url(#ag)"/>
+  <g class="b" style="animation-delay:1.6s">
+    <rect x="35" y="296" width="310" height="62" rx="12" fill="#7db287"/>
+    <text class="bt" x="190" y="323" text-anchor="middle" fill="#17211a">Test data management</text>
+    <text class="bs" x="190" y="343" text-anchor="middle" fill="#2c3a2f">static · dynamic · setup/teardown</text>
+  </g>
+  <path class="a" style="animation-delay:1.95s" pathLength="1" d="M190 360 L190 388" stroke="#a9cf8f" marker-end="url(#ag)"/>
+  <g class="b" style="animation-delay:2.1s">
+    <rect x="35" y="392" width="310" height="62" rx="12" fill="#7db287"/>
+    <text class="bt" x="190" y="419" text-anchor="middle" fill="#17211a">Test layer</text>
+    <text class="bs" x="190" y="439" text-anchor="middle" fill="#2c3a2f">tags · steps · assertions</text>
+  </g>
+  <path class="a" style="animation-delay:2.45s" pathLength="1" d="M190 456 L190 484" stroke="#a9cf8f" marker-end="url(#ag)"/>
+  <g class="b" style="animation-delay:2.6s">
+    <rect x="35" y="488" width="310" height="62" rx="12" fill="#c6c5d6"/>
+    <text class="bt" x="190" y="515" text-anchor="middle" fill="#24242c">Static gates</text>
+    <text class="bs" x="190" y="535" text-anchor="middle" fill="#44445a">TS · ESLint · Prettier · Husky</text>
+  </g>
+
+  <!-- Right column -->
+  <g class="b" style="animation-delay:.6s">
+    <rect x="415" y="104" width="310" height="62" rx="12" fill="#26262e"/>
+    <text class="bt" x="570" y="131" text-anchor="middle" fill="#f2eda0">Context engineering</text>
+    <text class="bs" x="570" y="151" text-anchor="middle" fill="#b9b5cc">void → disclosure → rot</text>
+  </g>
+  <path class="a" style="animation-delay:.95s" pathLength="1" d="M570 168 L570 196" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:1.1s">
+    <rect x="415" y="200" width="310" height="62" rx="12" fill="#26262e"/>
+    <text class="bt" x="570" y="227" text-anchor="middle" fill="#f2eda0">Orchestrator</text>
+    <text class="bs" x="570" y="247" text-anchor="middle" fill="#b9b5cc">CLAUDE.md</text>
+  </g>
+  <path class="a" style="animation-delay:1.45s" pathLength="1" d="M570 264 L570 292" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:1.6s">
+    <rect x="415" y="296" width="310" height="62" rx="12" fill="#26262e"/>
+    <text class="bt" x="570" y="323" text-anchor="middle" fill="#f2eda0">Skills = chapters</text>
+    <text class="bs" x="570" y="343" text-anchor="middle" fill="#b9b5cc">references · scripts · assets</text>
+  </g>
+  <path class="a" style="animation-delay:1.95s" pathLength="1" d="M570 360 L570 388" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:2.1s">
+    <rect x="415" y="392" width="310" height="62" rx="12" fill="#26262e" stroke="#f2eda0" stroke-width="2"/>
+    <text class="bt" x="570" y="419" text-anchor="middle" fill="#f2eda0">Set loop</text>
+    <text class="bs" x="570" y="439" text-anchor="middle" fill="#b9b5cc">constitution · role · content</text>
+  </g>
+
+  <!-- Converge into strict workflows -->
+  <path class="a" style="animation-delay:2.95s" pathLength="1" d="M190 552 C190 590 280 578 322 596" stroke="#a9cf8f" marker-end="url(#ag)"/>
+  <path class="a" style="animation-delay:2.95s" pathLength="1" d="M570 456 C570 550 480 572 438 594" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:3.3s">
+    <rect x="205" y="600" width="350" height="60" rx="12" fill="#f2eda0"/>
+    <text class="bt" x="380" y="626" text-anchor="middle" fill="#2b2b1e">Strict workflows</text>
+    <text class="bs" x="380" y="646" text-anchor="middle" fill="#55523a">feedback loops gate progress</text>
+  </g>
+
+  <!-- Execute / Validate / Proceed -->
+  <path class="a" style="animation-delay:3.7s" pathLength="1" d="M300 662 C240 680 180 680 135 696" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:3.95s">
+    <rect x="40" y="700" width="170" height="50" rx="11" fill="#c6c5d6"/>
+    <text class="bt" x="125" y="731" text-anchor="middle" fill="#24242c">Execute</text>
+  </g>
+  <path class="a" style="animation-delay:4.3s" pathLength="1" d="M214 725 L291 725" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b pulse" style="animation-delay:4.5s">
+    <rect x="295" y="700" width="170" height="50" rx="11" fill="#26262e" stroke="#b9b5cc" stroke-width="1.5"/>
+    <text class="bt" x="380" y="731" text-anchor="middle" fill="#f2eda0">Validate</text>
+  </g>
+  <text class="al lb" x="507" y="712" text-anchor="middle" style="animation-delay:4.85s">pass</text>
+  <path class="a" style="animation-delay:4.85s" pathLength="1" d="M469 725 L546 725" stroke="#a9cf8f" marker-end="url(#ag)"/>
+  <g class="b" style="animation-delay:5.1s">
+    <rect x="550" y="700" width="170" height="50" rx="11" fill="#7db287"/>
+    <text class="bt" x="635" y="731" text-anchor="middle" fill="#17211a">Proceed</text>
+  </g>
+
+  <!-- Failure loop -->
+  <text class="al lb" x="272" y="778" text-anchor="middle" style="animation-delay:5.4s">on failure</text>
+  <path class="a" style="animation-delay:5.4s" pathLength="1" d="M340 754 C280 780 190 786 132 812" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:5.7s">
+    <rect x="35" y="818" width="150" height="46" rx="11" fill="#f2eda0"/>
+    <text class="bt" x="110" y="847" text-anchor="middle" fill="#2b2b1e" font-size="15">Step back</text>
+  </g>
+  <path class="a" style="animation-delay:5.95s" pathLength="1" d="M189 841 L211 841" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:6.1s">
+    <rect x="215" y="818" width="150" height="46" rx="11" fill="#f2eda0"/>
+    <text class="bt" x="290" y="847" text-anchor="middle" fill="#2b2b1e" font-size="15">Evaluate</text>
+  </g>
+  <path class="a" style="animation-delay:6.35s" pathLength="1" d="M369 841 L391 841" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:6.5s">
+    <rect x="395" y="818" width="150" height="46" rx="11" fill="#f2eda0"/>
+    <text class="bt" x="470" y="847" text-anchor="middle" fill="#2b2b1e" font-size="15">Root cause</text>
+  </g>
+  <path class="a" style="animation-delay:6.75s" pathLength="1" d="M549 841 L571 841" stroke="#e6df8e" marker-end="url(#ay)"/>
+  <g class="b" style="animation-delay:6.9s">
+    <rect x="575" y="818" width="150" height="46" rx="11" fill="#f2eda0"/>
+    <text class="bt" x="650" y="847" text-anchor="middle" fill="#2b2b1e" font-size="15">Resolve</text>
+  </g>
+  <text class="al lb" x="601" y="788" text-anchor="middle" style="animation-delay:7.15s">verify again ↻</text>
+  <path class="a" style="animation-delay:7.15s" pathLength="1" d="M650 814 C650 780 540 792 476 756" stroke="#a9cf8f" marker-end="url(#ag)"/>
+
+  <!-- Continuous flow overlay on the failure loop -->
+  <path class="flow" d="M340 754 C280 780 190 786 132 812 M189 841 L211 841 M369 841 L391 841 M549 841 L571 841 M650 814 C650 780 540 792 476 756"/>
+</svg>
+</div>
+<button id="replay">↻ Replay animation</button>
+<script>
+  document.getElementById('replay').addEventListener('click', () => {
+    const w = document.getElementById('wrap');
+    w.innerHTML = w.innerHTML; // re-inserting restarts all CSS animations
+  });
+</script>
+</body>
+</html>

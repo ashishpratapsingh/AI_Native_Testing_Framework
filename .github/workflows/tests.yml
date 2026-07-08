@@ -1,0 +1,92 @@
+# Tiered CI: static gates + smoke on every PR; full regression on main and nightly.
+# Mirrors the framework's set loop — feedback loops gate progress.
+name: tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 2 * * *' # nightly regression, 02:00 UTC
+  workflow_dispatch:
+
+env:
+  UI_BASE_URL: ${{ vars.UI_BASE_URL || 'https://www.saucedemo.com' }}
+  API_BASE_URL: ${{ vars.API_BASE_URL || 'https://restful-booker.herokuapp.com' }}
+  STANDARD_USER: ${{ secrets.STANDARD_USER || 'standard_user' }}
+  STANDARD_PASSWORD: ${{ secrets.STANDARD_PASSWORD || 'secret_sauce' }}
+  LOCKED_OUT_USER: ${{ secrets.LOCKED_OUT_USER || 'locked_out_user' }}
+  API_ADMIN_USER: ${{ secrets.API_ADMIN_USER || 'admin' }}
+  API_ADMIN_PASSWORD: ${{ secrets.API_ADMIN_PASSWORD || 'password123' }}
+  CI: 'true'
+
+jobs:
+  # ── Tier 1: static gates — fast, no browser, fail early ──────────────
+  static-gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Format check
+        run: npm run format:check
+
+  # ── Tier 2: smoke — every PR, only @smoke tagged tests ───────────────
+  smoke:
+    needs: static-gates
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+      - name: Run smoke suite
+        run: npx playwright test --grep "@smoke"
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-smoke
+          path: playwright-report/
+          retention-days: 7
+
+  # ── Tier 3: full regression — main pushes, nightly, manual ───────────
+  regression:
+    needs: static-gates
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: ['@ui', '@api']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Playwright browsers
+        if: matrix.suite == '@ui'
+        run: npx playwright install --with-deps chromium
+      - name: Run ${{ matrix.suite }} regression
+        run: npx playwright test --grep "${{ matrix.suite }}"
+      - name: Upload report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-${{ matrix.suite == '@ui' && 'ui' || 'api' }}
+          path: playwright-report/
+          retention-days: 14
