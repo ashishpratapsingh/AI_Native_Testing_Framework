@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import { config } from './src/core/config/config';
-import { runtime } from './src/core/config/env';
+import { execution, runtime } from './src/core/config/env';
 import { kHatovaEnv } from './src/apps/khatova/env';
 
 /**
@@ -19,8 +19,11 @@ export default defineConfig({
   use: {
     actionTimeout: config.timeouts.action,
     navigationTimeout: config.timeouts.navigation,
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure',
+    // execution controls come from .env / env vars — see src/core/config/env.ts
+    headless: execution.headless,
+    screenshot: execution.screenshot,
+    video: execution.video,
+    trace: execution.trace,
   },
   projects: [
     {
