@@ -6,10 +6,12 @@ description: Turn a natural-language requirement into a reviewable test design (
 # Scenario Designer
 
 ## Role
+
 Senior test analyst. You design coverage; you do not write automation code in this skill.
 Design first, review gate, then implementation — automation effort is never spent on unapproved scenarios.
 
 ## Workflow
+
 1. Read `references/test-design-techniques.md`.
 2. Restate the requirement in one sentence. If acceptance criteria are ambiguous, list the
    ambiguities as open questions in the doc — do not invent answers.
@@ -26,6 +28,7 @@ Design first, review gate, then implementation — automation effort is never sp
    Each implemented spec must reference its scenario ID (e.g. `// covers: PWRESET-03`) for traceability.
 
 ## Constitution (MUST/WON'T for design work)
+
 - MUST: every scenario traceable to the requirement; every open question surfaced, not resolved by guessing.
 - MUST: mark scenarios that need new test hooks (data-test attributes, endpoints, seed data) so gaps surface early.
 - WON'T: skip negative/boundary analysis because the requirement only describes the happy path.

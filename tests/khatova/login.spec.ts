@@ -19,20 +19,24 @@ test.describe('Khatova login', { tag: [Tag.UI, KhatovaTag.Auth] }, () => {
     });
   });
 
-  test('invalid credentials stay on the login page', { tag: [Tag.Regression] }, async ({ loginPage }) => {
-    await test.step('open the login page', async () => {
-      await loginPage.goto();
-    });
+  test(
+    'invalid credentials stay on the login page',
+    { tag: [Tag.Regression] },
+    async ({ loginPage }) => {
+      await test.step('open the login page', async () => {
+        await loginPage.goto();
+      });
 
-    await test.step('submit invalid credentials', async () => {
-      await loginPage.login('invalid@example.com', 'wrong-password');
-    });
+      await test.step('submit invalid credentials', async () => {
+        await loginPage.login('invalid@example.com', 'wrong-password');
+      });
 
-    await test.step('the login form remains visible and reports the error', async () => {
-      await expect(loginPage.errorMessage).toContainText('Invalid login credentials');
-      await expect(loginPage.emailInput).toBeVisible();
-      await expect(loginPage.passwordInput).toBeVisible();
-      await expect(loginPage.submitButton).toBeVisible();
-    });
-  });
+      await test.step('the login form remains visible and reports the error', async () => {
+        await expect(loginPage.errorMessage).toContainText('Invalid login credentials');
+        await expect(loginPage.emailInput).toBeVisible();
+        await expect(loginPage.passwordInput).toBeVisible();
+        await expect(loginPage.submitButton).toBeVisible();
+      });
+    },
+  );
 });

@@ -22,7 +22,7 @@ export default defineConfig({
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
-  projects: [    
+  projects: [
     {
       name: 'khatova',
       testDir: './tests/khatova',

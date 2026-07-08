@@ -19,6 +19,7 @@ that a skill reference already covers.
 ## Constitution
 
 ### MUST
+
 - Import `test`/`expect` from `src/apps/<app>/fixtures.ts`, never from `@playwright/test` directly in specs.
 - Put every selector in a page object under `src/apps/<app>/pages/`. Specs contain zero selectors.
 - Call API helpers in `src/apps/<app>/clients/`; specs never call `request.get/post` directly.
@@ -33,11 +34,13 @@ that a skill reference already covers.
 - Run `npm run validate` and the relevant tagged tests before declaring work done.
 
 ### SHOULD
+
 - Generate dynamic data via factories in `src/apps/<app>/` (faker); keep seeded data in the app's `data/`.
 - Prefer `data-test` attributes for selectors.
 - Keep fixtures small and composable; extend the app's `fixtures.ts` rather than repeating setup.
 
 ### WON'T
+
 - Never modify `src/core/` or another app's folder while working on an app.
 - No `page.waitForTimeout()`, no `force: true`, no `.only` committed.
 - No `any` types, no `@ts-ignore`, no disabling lint rules inline without a comment explaining why.
@@ -68,22 +71,24 @@ following its existing patterns; you do not invent parallel structures.
 
 ## Map of the repo
 
-| Area | Path | Skill chapter |
-|---|---|---|
-| Engine (frozen) | `src/core/` | — |
-| App env + enums | `src/apps/<app>/env.ts`, `tags.ts`, `routes.ts`/`endpoints.ts` | `.claude/skills/app-onboarding` |
-| Schemas | `src/apps/<app>/schemas/` | `.claude/skills/api-test-author` |
-| API clients | `src/apps/<app>/clients/` | `.claude/skills/api-test-author` |
-| Page objects | `src/apps/<app>/pages/` | `.claude/skills/ui-test-author` |
-| Fixtures | `src/apps/<app>/fixtures.ts` | both |
-| Test data | `src/apps/<app>/data/`, `factories/` | both |
-| Specs | `tests/<app>/` | both |
-| Requirements in/out | `requirements/inbox/`, `processed/` | `.claude/skills/requirement-pipeline` |
-| Test designs | `docs/test-designs/` | `.claude/skills/scenario-designer` |
-| Failure triage | — | `.claude/skills/failure-triage` |
+| Area                | Path                                                           | Skill chapter                         |
+| ------------------- | -------------------------------------------------------------- | ------------------------------------- |
+| Engine (frozen)     | `src/core/`                                                    | —                                     |
+| App env + enums     | `src/apps/<app>/env.ts`, `tags.ts`, `routes.ts`/`endpoints.ts` | `.claude/skills/app-onboarding`       |
+| Schemas             | `src/apps/<app>/schemas/`                                      | `.claude/skills/api-test-author`      |
+| API clients         | `src/apps/<app>/clients/`                                      | `.claude/skills/api-test-author`      |
+| Page objects        | `src/apps/<app>/pages/`                                        | `.claude/skills/ui-test-author`       |
+| Fixtures            | `src/apps/<app>/fixtures.ts`                                   | both                                  |
+| Test data           | `src/apps/<app>/data/`, `factories/`                           | both                                  |
+| Specs               | `tests/<app>/`                                                 | both                                  |
+| Requirements in/out | `requirements/inbox/`, `processed/`                            | `.claude/skills/requirement-pipeline` |
+| Test designs        | `docs/test-designs/`                                           | `.claude/skills/scenario-designer`    |
+| Failure triage      | —                                                              | `.claude/skills/failure-triage`       |
 
-Current apps: `saucedemo` (UI demo), `restful-booker` (API demo). Delete them once real apps are onboarded.
+Current apps: `khatova`.
 
 ## Context hygiene
 
-- *
+- **Context void**: assume you know nothing about this repo at session start; this file + skills feed you.
+- **Progressive disclosure**: load one skill chapter at a time, only when the task touches its area.
+- **Context rot**: in long sessions, re-read this file and the active skill before large edits.

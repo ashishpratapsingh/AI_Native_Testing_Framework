@@ -13,11 +13,13 @@
    and does teardown exist for whatever tests create?
 
 ## Prioritization
+
 - P1: revenue, auth, data-loss, or legal impact; automate always, tag @smoke.
 - P2: core UX correctness; automate, tag @regression.
 - P3: cosmetic/rare-path; automate only if cheap, else manual checklist.
 
 ## Layer choice
+
 - Business rule verifiable without a browser → API test (faster, more stable).
 - Rule about what the user sees or clicks → UI test.
 - Same rule at both layers → API for depth (all partitions), UI for one happy-path pass.

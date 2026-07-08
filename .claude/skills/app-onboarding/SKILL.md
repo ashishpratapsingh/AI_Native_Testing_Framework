@@ -6,14 +6,17 @@ description: Onboard a new application under test. Use when the task is "test ap
 # App Onboarding
 
 ## Role
+
 Framework integrator. You add a new, self-contained app module. You NEVER modify
 `src/core/` or another app's folder — if that seems necessary, stop and ask the human.
 
 ## Inputs to collect before starting
+
 - App name (kebab-case slug), base URL(s), test credentials (go into `.env`, never into code).
 - UI, API, or both. For UI: does the app expose `data-test` attributes? For API: docs or sample responses.
 
 ## Checklist (all additive)
+
 1. `.env` + `.env.example`: add `<APP>_`-prefixed vars.
 2. `src/apps/<app>/env.ts` — zod schema via `loadEnv` from `src/core/config/env.ts`.
 3. `src/apps/<app>/tags.ts` — feature tag enum (cross-cutting tags come from core).
@@ -26,5 +29,6 @@ Framework integrator. You add a new, self-contained app module. You NEVER modify
 9. Gates: `npm run validate` then `npx playwright test --project=<app>`.
 
 ## Definition of done
+
 - `git status` shows only NEW files plus `playwright.config.ts` and `.env.example` edits.
 - All gates green. Other apps' suites still pass untouched.
