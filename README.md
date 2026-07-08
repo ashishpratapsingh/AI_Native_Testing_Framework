@@ -45,3 +45,7 @@ tests/<app>/         ← specs, one Playwright project per app
 ## CI/CD
 
 `.github/workflows/tests.yml` — tiered: static gates + `@smoke` on every PR; full `@ui`/`@api` regression on main, nightly, and on demand. URLs come from GitHub Variables, credentials from Secrets.
+
+## Self-healing
+
+Prevention (web-first assertions, `data-test` selectors, factories, teardown) plus precise failure localization (one symptom → one file) plus agent-driven repair. `.github/workflows/auto-triage.yml` completes the loop: when a main/nightly run fails, a Claude agent downloads the traces, runs the `failure-triage` skill, and either opens a PR fixing the root cause (test-side defects) or files an issue (product bugs) — never a silent runtime heal, never a loosened assertion. Requires the `ANTHROPIC_API_KEY` repo secret and "Allow GitHub Actions to create and approve pull requests" enabled.
