@@ -25,6 +25,8 @@ From that one sentence, an AI agent produces a test plan (including negative cas
       ↓
  Test scripts        ← AI writes the code, following the project rulebook
       ↓
+ Independent review  ← a second AI reviews the code against the plan
+      ↓
  Execution           ← every check must pass before work is accepted
       ↓
  Audit trail         ← requirement archived with results and links to everything
@@ -107,7 +109,7 @@ docs/test-designs/   ← AI-generated, human-approved test designs
 
 **Static gates** — strict TS, ESLint (`no-floating-promises`), Prettier, Husky pre-commit.
 
-**AI layer** — `CLAUDE.md` is the orchestrator (constitution, role, set loop). `.claude/skills/` are chapters loaded on demand: `requirement-pipeline` (inbox → scenarios → review gate → scripts → execution → archive), `scenario-designer`, `app-onboarding`, `ui-test-author`, `api-test-author`, `failure-triage`.
+**AI layer** — `CLAUDE.md` is the orchestrator (constitution, role, set loop). `.claude/skills/` are chapters loaded on demand: `requirement-pipeline` (inbox → scenarios → review gate → scripts → execution → archive), `scenario-designer`, `app-onboarding`, `ui-test-author`, `api-test-author`, `test-reviewer` (independent semantic review of every new spec — reviewer is never the author; verdicts in `docs/test-reviews/`, also runs on every PR via `.github/workflows/test-review.yml`), `failure-triage`.
 
 ## The requirement pipeline
 

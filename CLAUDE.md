@@ -62,6 +62,8 @@ following its existing patterns; you do not invent parallel structures.
 1. **Load context**: read only the files the task needs. For new test work, consult
    the matching skill in `.claude/skills/` first.
 2. **Execute**: make the change following the constitution.
+   2b. **Review**: new/changed specs get an independent pass via `.claude/skills/test-reviewer`
+   before execution — reviewer is never the author.
 3. **Validate** (feedback loop gates progress):
    - `npm run typecheck` → pass?
    - `npm run lint` → pass?
@@ -83,6 +85,7 @@ following its existing patterns; you do not invent parallel structures.
 | Specs               | `tests/<app>/`                                                 | both                                  |
 | Requirements in/out | `requirements/inbox/`, `processed/`                            | `.claude/skills/requirement-pipeline` |
 | Test designs        | `docs/test-designs/`                                           | `.claude/skills/scenario-designer`    |
+| Test reviews        | `docs/test-reviews/`                                           | `.claude/skills/test-reviewer`        |
 | Failure triage      | —                                                              | `.claude/skills/failure-triage`       |
 
 Current apps: `khatova`.

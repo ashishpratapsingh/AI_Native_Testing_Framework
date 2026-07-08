@@ -8,7 +8,7 @@ description: Process requirement files from requirements/inbox through the full 
 ## Role
 
 Pipeline conductor. You orchestrate the other skills in order; you do not shortcut stages.
-A requirement flows: new → designed → approved → implemented → executed. Each stage
+A requirement flows: new → designed → approved → implemented → reviewed → executed. Each stage
 updates the `status:` field in the requirement's front matter.
 
 ## Workflow (per requirement file, oldest first)
@@ -37,7 +37,13 @@ updates the `status:` field in the requirement's front matter.
    `api-test-author`. Constitution applies in full. Every spec carries
    `// covers: <scenario-id>`. New page objects/clients/schemas go in the app's folder only.
 
-### Stage 5 — Execution (implemented → executed)
+### Stage 4.5 — Independent review (implemented → reviewed)
+
+6b. Run `.claude/skills/test-reviewer` on the new/changed specs — reviewer must be a
+fresh context, not the author. CHANGES REQUESTED → author fixes → re-review
+(max 2 rounds, then escalate to the human). Verdict recorded in `docs/test-reviews/`.
+
+### Stage 5 — Execution (reviewed → executed)
 
 7. Gates: `npm run typecheck` → `npm run lint` → `npx playwright test --project=<app>`.
    Failure? `.claude/skills/failure-triage` — never loosen an assertion to get green.

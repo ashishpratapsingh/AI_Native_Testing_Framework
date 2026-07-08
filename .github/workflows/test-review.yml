@@ -1,0 +1,52 @@
+# Independent AI review of test code on every PR that touches tests or app modules.
+# The reviewer is a fresh agent context — never the author — applying
+# .claude/skills/test-reviewer/references/review-checklist.md.
+# Requires the ANTHROPIC_API_KEY repo secret (same as auto-triage).
+name: test-review
+
+on:
+  pull_request:
+    paths:
+      - 'tests/**'
+      - 'src/apps/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run test-reviewer agent
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: |
+            --max-turns 25
+            --allowedTools "Read,Glob,Grep,Bash"
+          prompt: |
+            You are the independent test reviewer for PR #${{ github.event.pull_request.number }}.
+            You did not author this code. Review it; do not fix it.
+
+            1. Read CLAUDE.md, then .claude/skills/test-reviewer/SKILL.md and its
+               references/review-checklist.md — apply that checklist exactly.
+            2. Get the diff: `gh pr diff ${{ github.event.pull_request.number }}`.
+               Scope: changed files under tests/** and src/apps/**.
+            3. If specs reference a design doc (// covers: tags), read it in
+               docs/test-designs/ and verify every Then maps to a real assertion.
+            4. Post ONE review via
+               `gh pr review ${{ github.event.pull_request.number }} --comment --body "..."`:
+               verdict (APPROVED or CHANGES REQUESTED) + numbered findings, each with
+               file:line, checklist item, severity (Blocker/Major/Minor), and what
+               correct looks like. Minors alone do not block.
+
+            Hard rules: do not modify any file, do not approve/merge the PR itself,
+            do not post more than one review comment, never wave through a test that
+            would pass against a broken feature.
